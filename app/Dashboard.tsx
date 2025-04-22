@@ -239,9 +239,9 @@ function ProductListWithMemo({
 
 			// Sortujemy produkty wg różnych kryteriów
 			if (i % 2 === 0) {
-				allProducts.sort((a, b) => a.weight - b.weight);
+				allProducts.sort((a, b) => (a.weight ?? 0) - (b.weight ?? 0));
 			} else {
-				allProducts.sort((a, b) => b.score - a.score);
+				allProducts.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
 			}
 		}
 
@@ -375,10 +375,13 @@ function ProductStats({ category, searchQuery }) {
 			? Math.round(totalValue / filteredProducts.length)
 			: 0;
 
-	const categoryCount = filteredProducts.reduce((counts, product) => {
-		counts[product.category] = (counts[product.category] || 0) + 1;
-		return counts;
-	}, {});
+	const categoryCount = filteredProducts.reduce(
+		(counts, product) => {
+			counts[product.category] = (counts[product.category] || 0) + 1;
+			return counts;
+		},
+		{} as Record<string, number>
+	);
 
 	// Dodatkowe statystyki
 	const priceRanges = {
@@ -389,15 +392,18 @@ function ProductStats({ category, searchQuery }) {
 	};
 
 	// Statystyki marek (tylko dla nowych danych z markami)
-	const brandCount = filteredProducts.reduce((counts, product) => {
-		if (product.brand) {
-			counts[product.brand] = (counts[product.brand] || 0) + 1;
-		}
-		return counts;
-	}, {});
+	const brandCount = filteredProducts.reduce(
+		(counts, product) => {
+			if (product.brand) {
+				counts[product.brand] = (counts[product.brand] || 0) + 1;
+			}
+			return counts;
+		},
+		{} as Record<string, number>
+	);
 
 	// Pobieramy top 5 najczęstszych marek
-	const topBrands = Object.entries(brandCount)
+	const topBrands = Object.entries(brandCount as Record<string, number>)
 		.sort((a, b) => b[1] - a[1])
 		.slice(0, 5);
 
@@ -429,12 +435,14 @@ function ProductStats({ category, searchQuery }) {
 
 			<h3 className="font-bold mt-4 mb-2">Podział na kategorie:</h3>
 			<ul className="max-h-36 overflow-y-auto mb-4">
-				{Object.entries(categoryCount).map(([cat, count]) => (
-					<li key={cat} className="flex justify-between py-1 border-b">
-						<span>{cat}</span>
-						<span>{count}</span>
-					</li>
-				))}
+				{Object.entries(categoryCount as Record<string, number>).map(
+					([cat, count]) => (
+						<li key={cat} className="flex justify-between py-1 border-b">
+							<span>{cat}</span>
+							<span>{count}</span>
+						</li>
+					)
+				)}
 			</ul>
 
 			{topBrands.length > 0 && (
